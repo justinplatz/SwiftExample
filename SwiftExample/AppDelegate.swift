@@ -193,13 +193,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
     
     func pubNubSetState(){
         weak var weakSelf = self
-        self.client?.setState({[randomString()]:{[randomString()]:[randomString()]}} , forUUID: myConfig?.uuid, onChannel: channel1, withCompletion: { (status) -> Void in
+        self.client?.setState(["foo":"bar"] , forUUID: myConfig?.uuid, onChannel: channel1, withCompletion: { (status) -> Void in
             var strongSelf = weakSelf
             handleStatus(strongSelf.status)
         })
         //^# random string stuff not done right
     }
-    
+
     func pubNubGetState(){
         self.client?.stateForUUID(myConfig?.uuid, onChannel: channel1, withCompletion: { (result, status) -> Void in
             if(status){
@@ -224,7 +224,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
     }
     
     func pubNubSubscribeToChannels(){
-        self.client?.subscribeToChannels(channel1, withPresence: true, clientState: channel1:("foo" : "bar")!)
+        self.client?.subscribeToChannels(channel1, withPresence: true, clientState:(channel1:(["foo":"bar"])!))
         //^ # not done right
         
         /*
@@ -488,10 +488,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
         println("handleErrorStatus: PAM Error: for resource Will Auto Retry?: \(status.automaticallyRetry)")
         // # ^ ? YES OR NO
         
-        if (status.category == PNAccessDeniedCategory) {
+        if (status.category   == PNAccessDeniedCategory) {
             self.handlePAMError(status)
         }
-        else if (status.category == PNDecryptionErrorCategory) {
+        else if (status.category   == PNDecryptionErrorCategory) {
             
             println("Decryption error. Be sure the data is encrypted and/or encrypted with the correct cipher key.")
             println("You can find the raw data returned from the server in the status.data attribute: \(status.errorData)")
@@ -521,7 +521,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
         // Access Denied via PAM. Access status.data to determine the resource in question that was denied.
         // In addition, you can also change auth key dynamically if needed."
         
-        var pamResourceName = (status.errorData.channels != nil) ? status.errorData.channels[0] : status.errorData.channelGroups
+        var pamResourceName: AnyObject = (status.errorData.channels != nil) ? status.errorData.channels[0] : status.errorData.channelGroups
         var pamResourceType = (status.errorData.channels != nil) ? "channel" : "channel-groups"
         // # ^
         
@@ -530,7 +530,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
         
         // If its a PAM error on subscribe, lets grab the channel name in question, and unsubscribe from it, and re-subscribe to a channel that we're authed to
         
-        if (status.operation == PNSubscribeOperation) {
+        if (status.operation   == PNSubscribeOperation) {
             
             if (pamResourceType.isEqualToString("channel")) {
                 println("^^^^ Unsubscribing from \(pamResourceName)")
@@ -588,7 +588,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PNObjectEventListener {
             // status.data will contain more server-provided information about the ack as well.
             
         }
-        
         if (status.operation == PNSubscribeOperation) {
             
             var subscriberStatus: PNSubscribeStatus = status as PNSubscribeStatus
